@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <h2>Student Panel</h2>
+            <ul class="nav-links">
+                <li><a href="student-dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <header>
+                <h1>Welcome, <span id="studentName">Student</span></h1>
+            </header>
+            
+            <div id="msgBox" class="msg"></div>
+            
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div class="glass-card" style="flex: 1; min-width: 300px; text-align: center;">
+                    <h3>Your Profile QR</h3>
+                    <div class="qr-container">
+                        <img id="qrCodeImg" src="" alt="QR Code" style="display: none; margin: 0 auto;">
+                        <p id="qrPlaceholder" style="color: #94a3b8; font-size: 0.9rem;">Loading QR Code...</p>
+                    </div>
+                    <button id="markAttendanceBtn" class="btn btn-primary">Mark Attendance (Live Location)</button>
+                    <p id="locationStatus" style="margin-top: 1rem; font-size: 0.85rem; color: #cbd5e1;"></p>
+                </div>
+                
+                <div class="glass-card" style="flex: 2; min-width: 300px;">
+                    <h3>My Attendance History</h3>
+                    <div class="table-container">
+                        <table id="myAttendanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/attendance.js"></script>
+</body>
+</html>
