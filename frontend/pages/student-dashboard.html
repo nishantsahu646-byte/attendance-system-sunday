@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
     <div class="dashboard-layout">
@@ -30,7 +31,7 @@
                         <img id="qrCodeImg" src="" alt="QR Code" style="display: none; margin: 0 auto;">
                         <p id="qrPlaceholder" style="color: #94a3b8; font-size: 0.9rem;">Loading QR Code...</p>
                     </div>
-                    <button id="markAttendanceBtn" class="btn btn-primary">Mark Attendance (Live Location)</button>
+                    <button id="markAttendanceBtn" class="btn btn-primary">Mark Attendance (Scan Class QR)</button>
                     <p id="locationStatus" style="margin-top: 1rem; font-size: 0.85rem; color: #cbd5e1;"></p>
                 </div>
                 
@@ -54,6 +55,22 @@
             </div>
         </main>
     </div>
+
+    <!-- QR Code Scanner Modal -->
+    <div id="scannerModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Scan Classroom QR</h3>
+                <button id="closeModalBtn" class="modal-close-btn">&times;</button>
+            </div>
+            <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 1rem;">
+                Align the classroom projector QR code within the frame to mark your attendance.
+            </p>
+            <div id="reader" style="width: 100%;"></div>
+            <p id="scannerMessage" style="margin-top: 1rem; font-size: 0.9rem; font-weight: 500;"></p>
+        </div>
+    </div>
+
     <script src="../js/attendance.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const Attendance = require('../models/Attendance');
 const Student = require('../models/Student');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
@@ -7,8 +8,25 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const path = require('path');
 const fs = require('fs');
 
+// @route   GET /api/attendance/session-token
+// @desc    Generate a short-lived token for teacher's attendance QR
+// @access  Admin
+router.get('/session-token', protect, adminOnly, async (req, res) => {
+    try {
+        const token = jwt.sign(
+            { purpose: 'attendance-session' },
+            process.env.JWT_SECRET,
+            { expiresIn: '35s' } // 35 seconds to allow network latency buffer
+        );
+        res.json({ sessionToken: token });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   POST /api/attendance/mark
-// @desc    Mark attendance with location
+// @desc    Mark attendance with location and dynamic QR token
 // @access  Student
 router.post('/mark', protect, async (req, res) => {
     try {
@@ -16,9 +34,23 @@ router.post('/mark', protect, async (req, res) => {
             return res.status(403).json({ message: 'Only students can mark attendance' });
         }
 
-        const { latitude, longitude } = req.body;
+        const { latitude, longitude, sessionToken } = req.body;
         if (!latitude || !longitude) {
             return res.status(400).json({ message: 'Location is required' });
+        }
+
+        if (!sessionToken) {
+            return res.status(400).json({ message: 'Dynamic QR token is required to mark attendance.' });
+        }
+
+        // Verify the dynamic session token
+        try {
+            const decodedSession = jwt.verify(sessionToken, process.env.JWT_SECRET);
+            if (decodedSession.purpose !== 'attendance-session') {
+                return res.status(400).json({ message: 'Invalid session token' });
+            }
+        } catch (err) {
+            return res.status(400).json({ message: 'QR Code has expired or is invalid. Please scan the live QR code.' });
         }
 
         const student = await Student.findById(req.user.id);

@@ -67,6 +67,11 @@ async function loadMyAttendance() {
 
 const markBtn = document.getElementById('markAttendanceBtn');
 const locationStatus = document.getElementById('locationStatus');
+const scannerModal = document.getElementById('scannerModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const scannerMessage = document.getElementById('scannerMessage');
+
+let html5QrcodeScanner = null;
 
 if (markBtn) {
     markBtn.addEventListener('click', () => {
@@ -75,60 +80,122 @@ if (markBtn) {
             return;
         }
 
-        markBtn.disabled = true;
-        locationStatus.textContent = "Getting your live location...";
+        // Open modal
+        scannerModal.style.display = 'flex';
+        scannerMessage.textContent = "Initializing camera...";
+        scannerMessage.style.color = "#cbd5e1";
 
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-                locationStatus.textContent = "Location found. Marking attendance...";
-
-                try {
-                    const res = await fetch(`${API_URL}/attendance/mark`, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ latitude, longitude })
-                    });
-                    
-                    const data = await res.json();
-                    
-                    if (res.ok) {
-                        showMessage('Attendance marked successfully!', false);
-                        loadMyAttendance();
-                    } else {
-                        showMessage(data.message || 'Failed to mark attendance');
-                    }
-                } catch (error) {
-                    showMessage('Server error. Please try again later.');
-                } finally {
-                    markBtn.disabled = false;
-                    locationStatus.textContent = "";
-                }
-            },
-            (error) => {
-                markBtn.disabled = false;
-                locationStatus.textContent = "";
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        showMessage("User denied the request for Geolocation.");
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        showMessage("Location information is unavailable.");
-                        break;
-                    case error.TIMEOUT:
-                        showMessage("The request to get user location timed out.");
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        showMessage("An unknown error occurred.");
-                        break;
-                }
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+        // Start camera
+        startScanner();
     });
+}
+
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+        stopScanner();
+        scannerModal.style.display = 'none';
+    });
+}
+
+// Close modal if user clicks outside the modal content
+window.addEventListener('click', (e) => {
+    if (e.target === scannerModal) {
+        stopScanner();
+        scannerModal.style.display = 'none';
+    }
+});
+
+function startScanner() {
+    html5QrcodeScanner = new Html5Qrcode("reader");
+
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    // Choose back camera (environment) if available, otherwise any camera
+    html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanFailure
+    ).then(() => {
+        scannerMessage.textContent = "Camera active. Please point to the dynamic classroom QR code.";
+    }).catch(err => {
+        console.error("Camera start failed", err);
+        scannerMessage.textContent = "Failed to open camera. Make sure you have given camera permissions.";
+        scannerMessage.style.color = "#ef4444";
+    });
+}
+
+function stopScanner() {
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            html5QrcodeScanner = null;
+        }).catch(err => {
+            console.error("Error stopping scanner", err);
+        });
+    }
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+    // We found the token! Let's stop scanning and request location to submit
+    stopScanner();
+    scannerModal.style.display = 'none';
+
+    showMessage("QR Code scanned! Verifying your location...", false);
+
+    locationStatus.textContent = "Getting your precise GPS location...";
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            locationStatus.textContent = "Location retrieved. Submitting attendance...";
+
+            try {
+                const res = await fetch(`${API_URL}/attendance/mark`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ latitude, longitude, sessionToken: decodedText })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage('Attendance marked successfully!', false);
+                    loadMyAttendance();
+                } else {
+                    showMessage(data.message || 'Failed to mark attendance');
+                }
+            } catch (error) {
+                showMessage('Server error. Please try again later.');
+            } finally {
+                locationStatus.textContent = "";
+            }
+        },
+        (error) => {
+            locationStatus.textContent = "";
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    showMessage("Location denied. Please allow location permissions to mark attendance.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    showMessage("Location unavailable. Try moving to an open area.");
+                    break;
+                case error.TIMEOUT:
+                    showMessage("Location request timed out. Please try again.");
+                    break;
+                default:
+                    showMessage("An unknown error occurred while getting location.");
+                    break;
+            }
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+}
+
+function onScanFailure(error) {
+    // This callback runs repeatedly while scanning. We can ignore it or log in debug.
 }
 
 loadProfile();

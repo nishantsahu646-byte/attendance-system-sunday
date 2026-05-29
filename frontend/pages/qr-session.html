@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Attendance Session - QR Code</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <h2>Admin Panel</h2>
+            <ul class="nav-links">
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+                <li><a href="add-student.html">Add Student</a></li>
+                <li><a href="attendance.html">View Attendance</a></li>
+                <li><a href="qr-session.html" class="active">Start Session</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <header>
+                <h1>Live Attendance Session</h1>
+                <p style="color: #94a3b8;">Students must scan this live QR code using their dashboards to mark their attendance.</p>
+            </header>
+            
+            <div id="msgBox" class="msg"></div>
+
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+                <div class="glass-card" style="flex: 1; max-width: 500px; text-align: center;">
+                    <h3>Scan Live QR Code</h3>
+                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 1.5rem;">
+                        This code changes dynamically to prevent screenshot sharing.
+                    </p>
+                    
+                    <div class="qr-container" style="background: white; padding: 1.5rem; border-radius: 12px; display: inline-block; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                        <img id="sessionQrImg" src="" alt="Dynamic Session QR Code" style="width: 250px; height: 250px; display: block; margin: 0 auto;">
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <span id="countdownLabel" style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">
+                            Refreshing in <strong id="timerSecs" style="color: #ec4899; font-size: 1.2rem;">15</strong> seconds
+                        </span>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="flex: 1; max-width: 400px; text-align: left; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3>Session Controls</h3>
+                        <p style="font-size: 0.9rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1.5rem;">
+                            1. Display this page on the projector/classroom screen.<br>
+                            2. Ask students to scan it with their phone camera from their dashboard.<br>
+                            3. The system will verify if they are within the college boundary.
+                        </p>
+                    </div>
+
+                    <div style="text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <button id="refreshQrBtn" class="btn btn-primary" style="margin-bottom: 1rem;">Force Refresh Code</button>
+                        <a href="attendance.html" class="btn btn-secondary">View Live Records</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/qr-session.js"></script>
+</body>
+</html>
