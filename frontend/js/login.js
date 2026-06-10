@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = window.location.origin === 'null' || window.location.protocol === 'file:' 
+    ? 'http://localhost:5001/api' 
+    : '/api';
 
 const adminForm = document.getElementById('adminLoginForm');
 const studentForm = document.getElementById('studentLoginForm');
@@ -22,7 +24,13 @@ if (adminForm) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                data = { message: text };
+            }
 
             if (res.ok) {
                 localStorage.setItem('adminToken', data.token);
@@ -48,7 +56,13 @@ if (studentForm) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rollNumber, password })
             });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                data = { message: text };
+            }
 
             if (res.ok) {
                 localStorage.setItem('studentToken', data.token);

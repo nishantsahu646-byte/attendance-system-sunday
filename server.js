@@ -68,7 +68,7 @@ app.use('/api/attendance', require('./routes/attendanceRoutes'));
 // I will include admin features in student and attendance routes but let's add an explicit admin route if needed.
 
 // API Routes
-app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/', require('./routes/adminRoutes'));
 
 // Fallback to index.html for SPA-like behavior (optional, if using pure static HTML, we might not need this, but good for direct URL hits)
 app.get('/', (req, res) => {
@@ -89,4 +89,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-j

@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = window.location.origin === 'null' || window.location.protocol === 'file:' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
 const token = localStorage.getItem('studentToken');
 
 if (!token) {
